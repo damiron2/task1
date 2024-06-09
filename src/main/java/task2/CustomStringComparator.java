@@ -1,0 +1,17 @@
+package task2;
+
+import java.util.Comparator;
+
+public class CustomStringComparator implements Comparator<String> {
+
+    @Override
+    public int compare(String o1, String o2) {
+        String[] s1 = o1.split("\\.");
+        String[] s2 = o2.split("\\.");
+        if (s1[1].compareTo(s2[1])==0){
+            return Integer.parseInt(s1[0])-Integer.parseInt(s2[0]);
+        } else{
+            return s1[1].compareToIgnoreCase(s2[1]);
+        }
+    }
+}
