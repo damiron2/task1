@@ -1,16 +1,14 @@
 package task2;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CustomStringFileSorter {
     private List<String> list;
@@ -23,24 +21,11 @@ public class CustomStringFileSorter {
         this.pathOfSorted = pathOfSorted;
     }
 
-    public void inMemSort() {
+    public void inMemSort() throws IOException {
         List<String> list = new ArrayList<>();
-        try (
-        BufferedReader reader =  Files.newBufferedReader(pathOfUnsorted);
-        BufferedWriter writer = Files.newBufferedWriter(pathOfSorted)) {
-            String line;
-            while ((line = reader.readLine())!=null){
-                list.add(line);
-            }
-            list.sort(stringComparator);
-            for (int i = 0; i < list.size(); i++) {
-                writer.write(list.get(i));
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.getMessage();
-        }
-
+        Files.lines(pathOfUnsorted).filter(string -> !string.isEmpty()).forEach(list::add);
+        list.sort(stringComparator);
+        Files.write(pathOfSorted,list);
     }
 
     public List<Path> split() {
@@ -51,7 +36,7 @@ public class CustomStringFileSorter {
                 int fileIndex = 0;
                 long maxFileSize = 50 * 1024 * 1024; // 10 MB in bytes
                 long currentFileSize = 0;
-                Path path = Files.createTempFile(tempDir, fileIndex + "_tmp","");
+                Path path = Files.createTempFile(tempDir, fileIndex + "_tmp", "");
                 BufferedWriter writer = Files.newBufferedWriter(path);
                 String line;
                 tmpFiles.add(path);
@@ -79,7 +64,7 @@ public class CustomStringFileSorter {
         return tmpFiles;
     }
 
-    public List<Path> sort (List<Path> pathsOfUnsortedTmpFiles) throws IOException {
+    public List<Path> sort(List<Path> pathsOfUnsortedTmpFiles) throws IOException {
         List<Path> pathsOfSorted = new ArrayList<>();
         Path tempDir = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp_sorted");
         for (Path path : pathsOfUnsortedTmpFiles) {
