@@ -24,22 +24,25 @@ public class Main {
 
         String next = scanner.next();
 
-        if (next.equalsIgnoreCase("n")){
-            System.exit(0);
-        } else {
-            if (generatedFileSize<=200){
-                System.out.println("Generated file size <=200 Mb, start sort in memory");
-                CustomStringFileSorter customStringFileSorter = new CustomStringFileSorter(pathForUnsorted,pathForSorted);
-                customStringFileSorter.inMemSort();
-            } else {
-                System.out.println("Generated file size >=200 Mb, start sort with tmp files");
-                CustomStringFileSorter customStringFileSorter = new CustomStringFileSorter(pathForUnsorted,pathForSorted);
-                customStringFileSorter.merge(customStringFileSorter.sort(customStringFileSorter.split()));
+        while (!next.equalsIgnoreCase("n")){
+            if (next.equalsIgnoreCase("y")){
+                if (generatedFileSize<=200){
+                    System.out.println("Generated file size <=200 Mb, start sort in memory");
+                    CustomStringFileSorter customStringFileSorter = new CustomStringFileSorter(pathForUnsorted,pathForSorted);
+                    customStringFileSorter.inMemSort();
+                    System.out.println("Sorted, saved at " + pathForSorted);
+                    System.exit(0);
+                } else {
+                    System.out.println("Generated file size >=200 Mb, start sort with tmp files");
+                    CustomStringFileSorter customStringFileSorter = new CustomStringFileSorter(pathForUnsorted,pathForSorted);
+                    customStringFileSorter.merge(customStringFileSorter.sort(customStringFileSorter.split()));
+                    System.out.println("Sorted, saved at " + pathForSorted);
+                    System.exit(0);
+                }
             }
+            System.out.println("Do you wish to continue and sort file? y/n:  ");
+            next = scanner.next();
         }
-
-
-
-        System.out.println("Sorted, saved at " + pathForSorted);
+        System.exit(0);
     }
 }

@@ -14,8 +14,8 @@ public class StringGenerator {
                     .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                     .toString();
 
-            stringPair.add(new StringBuilder().append(random.nextInt(1000)).append(".").append(generatedString).toString());
-            stringPair.add(new StringBuilder().append(random.nextInt(1000)).append(".").append(generatedString).toString());
+            stringPair.add(new StringBuilder().append(random.nextInt(100)).append(".").append(generatedString).toString());
+            stringPair.add(new StringBuilder().append(random.nextInt(100)).append(".").append(generatedString).toString());
 
         return stringPair;
     }

@@ -33,12 +33,12 @@ public class CustomStringFileSorter {
                 list.add(line);
             }
             list.sort(stringComparator);
-            for (String string : list) {
-                writer.write(string);
+            for (int i = 0; i < list.size(); i++) {
+                writer.write(list.get(i));
                 writer.newLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
 
     }
