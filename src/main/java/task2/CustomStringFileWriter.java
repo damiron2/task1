@@ -36,7 +36,7 @@ public class CustomStringFileWriter {
                 //Записываем вторую идентичную строку для выполнения условия задания - в файле должны быть дубли строк
                 fileWriter.write(pairForWrite.get(1));
                 fileWriter.newLine();
-                fileSize+=(pairForWrite.get(0).getBytes().length + pairForWrite.get(1).getBytes().length + System.lineSeparator().length());
+                fileSize+=(pairForWrite.get(0).getBytes().length + pairForWrite.get(1).getBytes().length + System.lineSeparator().length()*2L);
                 stringCounter+=2;
             }
         } catch (IOException e) {

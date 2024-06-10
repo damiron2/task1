@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class CustomStringFileSorter {
-    private List<String> list;
-    private Path pathOfUnsorted;
-    private Path pathOfSorted;
+    private final Path pathOfUnsorted;
+    private final Path pathOfSorted;
     private final CustomStringComparator stringComparator = new CustomStringComparator();
 
     public CustomStringFileSorter(Path pathOfUnsorted, Path pathOfSorted) {
@@ -21,20 +20,14 @@ public class CustomStringFileSorter {
         this.pathOfSorted = pathOfSorted;
     }
 
-    public void inMemSort() throws IOException {
-        List<String> list = new ArrayList<>();
-        Files.lines(pathOfUnsorted).filter(string -> !string.isEmpty()).forEach(list::add);
-        list.sort(stringComparator);
-        Files.write(pathOfSorted,list);
-    }
 
-    public List<Path> split() {
+    public void split() throws IOException {
         List<Path> tmpFiles = new ArrayList<>();
         try {
             Path tempDir = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp");
             try (BufferedReader reader = Files.newBufferedReader(pathOfUnsorted)) {
                 int fileIndex = 0;
-                long maxFileSize = 50 * 1024 * 1024; // 10 MB in bytes
+                long maxFileSize = 50 * 1024 * 1024; // 50 MB in bytes
                 long currentFileSize = 0;
                 Path path = Files.createTempFile(tempDir, fileIndex + "_tmp", "");
                 BufferedWriter writer = Files.newBufferedWriter(path);
@@ -61,27 +54,27 @@ public class CustomStringFileSorter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return tmpFiles;
+        sort(tmpFiles);
     }
 
-    public List<Path> sort(List<Path> pathsOfUnsortedTmpFiles) throws IOException {
+    public void sort(List<Path> pathsOfUnsortedTmpFiles) throws IOException {
         List<Path> pathsOfSorted = new ArrayList<>();
         Path tempDir = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp_sorted");
         for (Path path : pathsOfUnsortedTmpFiles) {
             Path pathTmpSorted = Files.createTempFile(tempDir, path.getFileName() + "_sorted", ".txt");
-            BufferedWriter writer = Files.newBufferedWriter(pathTmpSorted);
             pathsOfSorted.add(pathTmpSorted);
-            list = Files.readAllLines(path);
-            list.sort(stringComparator);
-            for (String s : list) {
-                writer.write(s);
-                writer.newLine();
-            }
-            writer.close();
+            inMemSort(path, pathTmpSorted);
             Files.deleteIfExists(path);
         }
         Files.deleteIfExists(pathsOfUnsortedTmpFiles.get(0).getParent());
-        return pathsOfSorted;
+        merge(pathsOfSorted);
+    }
+
+    public void inMemSort(Path pathOfUnsorted, Path pathOfSorted) throws IOException {
+        List<String> list = new ArrayList<>();
+        Files.lines(pathOfUnsorted).filter(string -> !string.isEmpty()).forEach(list::add);
+        list.sort(stringComparator);
+        Files.write(pathOfSorted, list);
     }
 
     public void merge(List<Path> pathOfSortedTmp) throws IOException {
