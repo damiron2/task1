@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         System.out.println("Specify the file size in MB");
         Scanner scanner = new Scanner(System.in);
@@ -33,10 +33,13 @@ public class Main {
                     System.out.println("Sorted, saved at " + pathForSorted);
                     System.exit(0);
                 } else {
+                    long start = System.currentTimeMillis();
                     System.out.println("Generated file size >=200 Mb, start sort with tmp files");
                     CustomStringFileSorter customStringFileSorter = new CustomStringFileSorter(pathForUnsorted,pathForSorted);
                     customStringFileSorter.split();
                     System.out.println("Sorted, saved at " + pathForSorted);
+                    long finish = System.currentTimeMillis();
+                    System.out.println((finish-start)/1000 + " sec");
                     System.exit(0);
                 }
             }

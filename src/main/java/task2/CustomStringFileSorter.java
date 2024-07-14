@@ -9,6 +9,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class CustomStringFileSorter {
     private final Path pathOfUnsorted;
@@ -21,7 +24,7 @@ public class CustomStringFileSorter {
     }
 
 
-    public void split() throws IOException {
+    public void split() throws IOException, InterruptedException {
         List<Path> tmpFiles = new ArrayList<>();
         try {
             Path tempDir = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp");
@@ -54,7 +57,8 @@ public class CustomStringFileSorter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        sort(tmpFiles);
+        //sort(tmpFiles);
+        multithreadSort(tmpFiles);
     }
 
     public void sort(List<Path> pathsOfUnsortedTmpFiles) throws IOException {
@@ -70,6 +74,27 @@ public class CustomStringFileSorter {
         merge(pathsOfSorted);
     }
 
+    public void multithreadSort(List<Path> pathsOfUnsortedTmpFiles) throws IOException, InterruptedException {
+        List<Path> pathsOfSorted = new ArrayList<>();
+        Path tempDir = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp_sorted");
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        for (Path path : pathsOfUnsortedTmpFiles) {
+            Path pathOfSortedTmp = Files.createTempFile(tempDir, tempDir.getFileName() + "_sorted", ".txt");
+            executorService.execute(new Thread(() -> {
+                try {
+                    inMemSort(path, pathOfSortedTmp);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+            pathsOfSorted.add(pathOfSortedTmp);
+        }
+        executorService.shutdown();
+        executorService.awaitTermination(10, TimeUnit.DAYS);
+    }
+
     public void inMemSort(Path pathOfUnsorted, Path pathOfSorted) throws IOException {
         List<String> list = new ArrayList<>();
         Files.lines(pathOfUnsorted).filter(string -> !string.isEmpty()).forEach(list::add);
@@ -78,6 +103,7 @@ public class CustomStringFileSorter {
     }
 
     public void merge(List<Path> pathOfSortedTmp) throws IOException {
+        long start = System.currentTimeMillis();
         List<BufferedReader> readers = new ArrayList<>();
         for (Path path : pathOfSortedTmp) {
             BufferedReader reader = Files.newBufferedReader(path);
@@ -112,6 +138,7 @@ public class CustomStringFileSorter {
         }
 
         bw.close();
+        long finish = System.currentTimeMillis();
+        System.out.println((finish - start) / 1000 + " sec merged");
     }
-
 }
